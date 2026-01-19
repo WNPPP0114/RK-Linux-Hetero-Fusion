@@ -1,0 +1,100 @@
+好的，为了完全匹配你脚本中的路径，我们可以直接在终端运行以下命令。这些命令会自动创建目录、从 ARM 官网下载指定版本的编译器，并解压到正确的位置。
+
+请依次复制下面的命令在终端中执行：
+
+第一步：清理旧文件并重建目录
+这会强制删除 /usr/local/arm64 下所有内容，并重新创建一个干净的目录。
+sudo rm -rf /usr/local/arm64
+sudo mkdir -p /usr/local/arm64
+cd /usr/local/arm64
+
+
+第二步：从国内高速镜像下载
+sudo wget https://hf-mirror.com/csukuangfj/sherpa-ncnn-toolchains/resolve/main/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+
+
+第三步：解压
+下载完成后，执行解压命令：
+
+sudo tar -vxf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+第四步：验证是否成功
+
+执行下面的命令，如果能看到版本信息（gcc version 10.3.1），说明安装路径完全正确：
+
+/usr/local/arm64/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc --version
+
+
+
+注意把3rdparty移到CMake文件的上一级目录：
+set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/librknn_api)  #该变量定义了RKNN API库的路径
+
+
+注意插件安装Code Runner才能右键运行build.sh
+
+
+01_RKNN Tooklit2建议改名为01_RKNN_Tooklit2
+清理文件 
+rm -rf '01_RKNN Tooklit2'
+
+
+adb shell 直接在虚拟机终端操控开发板
+
+
+
+这样就对了：
+例如：
+目录：./01_resnet18
+正确指定模型路径：model/RK3588/resnet18.rknn
+正确指定输入图像：./model/space_shuttle_224.jpg
+
+指令：./01_resnet18 model/RK3588/resnet18.rknn ./model/space_shuttle_224.jpg
+
+(rknn) root@topeet:/home/topeet/02_RKNPU2/03_rknn-cpp-Multithreading-main/install/rknn_yolov5_demo_Linux# 
+
+
+./rknn_yolov5_demo ./model/RK3588/yolov5s.rknn /home/topeet/01_RKNN_Tooklit2/08_rknn-multi-threaded-nosigmoid/rknn-multi-threaded-nosigmoid/test.mp4
+
+
+./rknn_yolov5_demo ./model/RK3588/yolov5s.rknn /dev/video21
+
+./rknn_yolov5_demo ./model/RK3588/yolov5s-640-640.rknn /home/topeet/01_RKNN_Tooklit2/08_rknn-multi-threaded-nosigmoid/rknn-multi-threaded-nosigmoid/test.mp4
+
+
+(rknn) root@topeet:/home/topeet/02_RKNPU2/01_resnet18/install/resnet18_Linux# ./resnet18 model/RK3588/resnet18.rknn ./model/space_shuttle_224.jpg
+model input num: 1, output num: 1
+ --- Top5 ---
+812: 22.875048
+404: 14.578398
+657: 11.852356
+833: 11.378262
+466: 11.259738
+
+
+./non_copy model/RK3588/resnet18.rknn ./model/space_shuttle_224.jpg
+
+
+
+
+
+
+
+C api：加速模型运行后永远是摄像头：
+// 1. 去掉写死的 "/dev/video11"，改为声明空对象
+  cv::VideoCapture capture; 
+
+  // 2. 这一行建议注释掉，读取 MP4 视频不需要设置格式，强行设置可能会导致打开失败
+  // capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('N', 'V', '1', '2'));
+
+  cv::namedWindow("Camera FPS");
+  
+  // 3. 取消原来的注释，启用自动判断逻辑
+  if (strlen(image_name) == 1)
+    capture.open((int)(image_name[0] - '0')); // 对应参数如 "0", "1"
+  else
+    capture.open(image_name); // 对应参数如 "./test.mp4" 或 "/dev/video21"
+
+
+注意把build文件删除后重建
+
+
+

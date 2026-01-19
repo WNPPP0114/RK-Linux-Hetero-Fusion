@@ -1,0 +1,250 @@
+迅为官方代码输入输出维度不匹配问题解决：
+
+...
+
+if __name__ == '__main__':
+...
+
+    # 使用opencv获取推理的图片数据
+    img = cv2.imread(filename="./space_shuttle_224.jpg")
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+
+    # 【核心修改点】: 增加一个维度，从 (224,224,3) 变成 (1,224,224,3)
+    img = np.expand_dims(img, 0)
+
+    # 调用inference接口进行推理测试
+    # 注意：如果模型输入尺寸严格要求224x224，请确保图片已经是该尺寸
+    outputs = rknn.inference(
+        inputs=[img],
+        data_format=None
+    )
+...
+
+
+或者：
+# Inference
+    print('--> Running model')
+    outputs = rknn.inference(inputs=[img])  # <--- 这一行需要修改
+改为：
+# Inference
+    print('--> Running model')
+    # 使用 np.expand_dims(img, 0) 将图片扩展为 (1,640,640,3) 仅传给模型
+    # img 变量本身保持 (640,640,3) 不变，供后面 cv2 使用
+    outputs = rknn.inference(inputs=[np.expand_dims(img, 0)])
+
+
+
+或者：
+        if ret:
+            # Inference
+            # print('--> Running model')
+            img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+
+改为：
+        if ret:
+            # Inference
+            # print('--> Running model')
+            img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+   	    # 使用 np.expand_dims(img, 0) 将图片扩展为 (1,640,640,3) 仅传给模型
+  	    # img 变量本身保持 (640,640,3) 不变，供后面 cv2 使用
+   	    outputs = rknn.inference(inputs=[np.expand_dims(img, 0)])
+
+
+或者08中：
+def myFunc(rknn_lite, IMG):
+    # ... (省略前面几行) ...
+    # 强制放缩
+    IMG = cv2.resize(IMG, (IMG_SIZE, IMG_SIZE))
+    outputs = rknn_lite.inference(inputs=[IMG])  # <--- 问题在这里，传入的是3维
+    
+    input0_data = outputs[0].reshape([3, -1]+list(outputs[0].shape[-2:]))
+    # ...
+
+改成：
+def myFunc(rknn_lite, IMG):
+    # ... (省略前面几行) ...
+    # 强制放缩
+    IMG = cv2.resize(IMG, (IMG_SIZE, IMG_SIZE))
+    
+    # 修改这一行：使用 np.expand_dims 临时增加一个维度 (Batch Size)
+    outputs = rknn_lite.inference(inputs=[np.expand_dims(IMG, 0)]) 
+
+    input0_data = outputs[0].reshape([3, -1]+list(outputs[0].shape[-2:]))
+    # ...
+
+
+
+adb push /home/wzp/RKNN/RKNN_test/课程代码/01_RKNN_Tooklit2	 /home/topeet
+adb push /home/wzp/RKNN/RKNN_test/课程代码/01_RKNN_Tooklit2/07_yolov5 /home/topeet/01_RKNN_Tooklit2
+
+adb push /home/wzp/RKNN/RKNN_test/课程代码/01_RKNN_Tooklit2/08_rknn-multi-threaded-nosigmoid /home/topeet/01_RKNN_Tooklit2
+
+adb push /home/wzp/RKNN/RKNN_test/课程代码/02_RKNPU2/03_rknn-cpp-Multithreading-main /home/topeet/02_RKNPU2
+
+
+
+开发板串口中：
+cd /home/topeet/01_RKNN_Tooklit2/06_rknntoolkitlite2
+
+cd /home/topeet/01_RKNN_Tooklit2
+
+
+
+
+
+
+
+摄像头长宽比例问题07：
+请找到代码底部的 while True: 循环，将其完全替换为以下内容：
+while True:
+        frames += 1
+        # 1. 从摄像头捕获原始帧 (保留原始分辨率，比如 1920x1080)
+        ret, frame_origin = cap.read()
+        
+        if ret:
+            # 获取原始图像的长宽
+            h_orig, w_orig = frame_origin.shape[:2]
+
+            # 2. 专门为模型准备一张缩放后的图片 (640x640)
+            # 注意：这里我们不动 frame_origin，而是生成一个新的 img_for_model
+            img_for_model = cv2.resize(frame_origin, (IMG_SIZE, IMG_SIZE))
+            
+            # (可选) 如果模型训练是RGB，建议转一下颜色，OpenCV默认是BGR
+            img_for_model = cv2.cvtColor(img_for_model, cv2.COLOR_BGR2RGB)
+
+            # 3. 推理 (传入 4维数据)
+            outputs = rknn.inference(inputs=[np.expand_dims(img_for_model, 0)])
+
+            # 4. 后处理
+            input0_data = outputs[0]
+            input1_data = outputs[1]
+            input2_data = outputs[2]
+
+            input0_data = input0_data.reshape([3, -1]+list(input0_data.shape[-2:]))
+            input1_data = input1_data.reshape([3, -1]+list(input1_data.shape[-2:]))
+            input2_data = input2_data.reshape([3, -1]+list(input2_data.shape[-2:]))
+
+            input_data = list()
+            input_data.append(np.transpose(input0_data, (2, 3, 0, 1)))
+            input_data.append(np.transpose(input1_data, (2, 3, 0, 1)))
+            input_data.append(np.transpose(input2_data, (2, 3, 0, 1)))
+
+            boxes, classes, scores = yolov5_post_process(input_data)
+
+            # 5. 关键步骤：把 640x640 下的坐标，还原回原始分辨率 (如 1920x1080)
+            if boxes is not None:
+                # 计算缩放比例
+                x_factor = w_orig / IMG_SIZE
+                y_factor = h_orig / IMG_SIZE
+                
+                # 调整坐标: x坐标 * x比例, y坐标 * y比例
+                boxes[:, 0] *= x_factor # x1
+                boxes[:, 1] *= y_factor # y1
+                boxes[:, 2] *= x_factor # x2
+                boxes[:, 3] *= y_factor # y2
+                
+                # 6. 在原始画面上画框 (frame_origin 是 BGR 格式，可以直接画)
+                draw(frame_origin, boxes, scores, classes)
+
+            # 计算帧率
+            if frames % 30 == 0:
+                print("30帧平均帧率:\t", 30 / (time.time() - loopTime), "帧")
+                fps = 30 / (time.time() - loopTime)
+                loopTime = time.time()
+
+            cv2.putText(frame_origin, "FPS: {:.2f}".format(fps), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            
+            # 7. 显示原始比例的画面
+            cv2.imshow("MIPI Camera", frame_origin)
+
+        # 按下'q'键退出循环
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+
+摄像头长宽比例问题08：
+你需要完全替换最底下的 myFunc 函数（顺便加上显示延迟和帧率）
+# 需要确保导入了 time 库
+# 记得确保文件开头 import time
+def myFunc(rknn_lite, IMG):
+    # 1. 记录开始时间
+    t_start = time.time()
+
+    # --- 图像处理与推理 (保持你之前的逻辑) ---
+    h_orig, w_orig = IMG.shape[:2]
+    IMG_model = cv2.resize(IMG, (IMG_SIZE, IMG_SIZE))
+    IMG_model = cv2.cvtColor(IMG_model, cv2.COLOR_BGR2RGB)
+    
+    outputs = rknn_lite.inference(inputs=[np.expand_dims(IMG_model, 0)])
+
+    input0_data = outputs[0].reshape([3, -1] + list(outputs[0].shape[-2:]))
+    input1_data = outputs[1].reshape([3, -1] + list(outputs[1].shape[-2:]))
+    input2_data = outputs[2].reshape([3, -1] + list(outputs[2].shape[-2:]))
+
+    input_data = list()
+    input_data.append(np.transpose(input0_data, (2, 3, 0, 1)))
+    input_data.append(np.transpose(input1_data, (2, 3, 0, 1)))
+    input_data.append(np.transpose(input2_data, (2, 3, 0, 1)))
+
+    boxes, classes, scores = yolov5_post_process(input_data)
+
+    if boxes is not None:
+        x_factor = w_orig / IMG_SIZE
+        y_factor = h_orig / IMG_SIZE
+        boxes[:, 0] *= x_factor
+        boxes[:, 1] *= y_factor
+        boxes[:, 2] *= x_factor
+        boxes[:, 3] *= y_factor
+        draw(IMG, boxes, scores, classes)
+    # ----------------------------------------
+
+    # 2. 计算延迟
+    t_end = time.time()
+    latency = (t_end - t_start) * 1000  # 转换为毫秒
+
+    # 3. 把延迟写在视频左上角 (如果不想在视频上显示，可以注释掉这行)
+    cv2.putText(IMG, "Latency: {:.2f} ms".format(latency), (10, 60), 
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    # 4. 【关键修改】同时返回图片和延迟数值
+    return IMG, latency
+
+
+修改主循环 (计算并显示 FPS)
+frames, loopTime, initTime = 0, time.time(), time.time()
+fps_text = "FPS: 0.0"
+latency_sum = 0  # 用于累计延迟，计算平均值
+
+while (cap.isOpened()):
+    frames += 1
+    ret, frame = cap.read()
+    if not ret:
+        break
+    pool.put(frame)
+    
+    # 【关键修改】因为 myFunc 现在返回两个值(frame, latency)，所以这里需要解包
+    result, flag = pool.get()
+    if flag == False:
+        break
+    frame, latency = result  # 解包出 图片 和 延迟
+    
+    latency_sum += latency   # 累加延迟
+
+    if frames % 30 == 0:
+        curr_fps = 30 / (time.time() - loopTime)
+        avg_latency = latency_sum / 30  # 计算过去30帧的平均延迟
+        
+        # 【关键修改】在串口打印帧率和延迟
+        print("30帧平均帧率:\t{:.2f} 帧\t平均延迟:\t{:.2f} ms".format(curr_fps, avg_latency))
+        
+        fps_text = "FPS: {:.2f}".format(curr_fps)
+        loopTime = time.time()
+        latency_sum = 0  # 清零延迟累计
+
+    # 在画面上画 FPS (绿色)
+    cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    
+    cv2.imshow('test', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
