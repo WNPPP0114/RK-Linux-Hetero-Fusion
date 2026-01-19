@@ -1,3 +1,5 @@
+[简体中文](./README_CN.md) | [English](./README.md)
+
 # RK-Linux-Hetero-Fusion
 
 **Embedded Linux Heterogeneous Computing Framework: Decoupled Vision & Reasoning on RK3588**
