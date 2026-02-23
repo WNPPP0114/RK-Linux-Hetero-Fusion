@@ -9,7 +9,7 @@
 
 ## 📖 项目简介
 
-**RK-Linux-Hetero-Fusion** 是一个专为 Rockchip RK3588 平台打造的高性能边缘 AI 异构计算框架。它突破了传统嵌入式系统“仅视觉（Vision-only）”的局限，通过零拷贝流水线将 **实时目标检测 (YOLO)** 与 **语义推理 (DeepSeek LLM)** 深度融合。
+**RK-Linux-Hetero-Fusion** 是一个专为 Rockchip RK3588 平台打造的高性能边缘 AI 异构计算框架。它突破了传统嵌入式系统“仅视觉（Vision-only）”的局限，通过零拷贝流水线将 **实时目标检测 (YOLO)** 与 **语义推理 (Qwen3 LLM)** 深度融合。
 
 针对边缘端常见的内存瓶颈与处理串行化痛点，RK-Linux-Hetero-Fusion 实现了基于 **DMA-BUF (DRM)** 的全链路零拷贝架构，实现了 CPU、NPU、RGA 和 GPU 之间的显存直通。该方案在 <12W 功耗下，同时实现了 **60+ FPS 视觉感知**、**14 tokens/s 复杂逻辑推理**以及 **4K UI 流畅渲染**，让嵌入式设备具备了初步的 AGI 能力。
 
@@ -34,8 +34,8 @@
 *   **通路 A：实时视觉 (YOLOv11)**
     *   在 NPU 上部署最新的 YOLOv11，应用算子融合与量化校准技术。
     *   以 **60+ FPS** 的速度生成结构化 JSON 感知数据。
-*   **通路 B：语义推理 (DeepSeek R1 1.5B)**
-    *   基于 RKLLM 部署全离线 **W4A16 量化** 大语言模型。
+*   **通路 B：语义推理 (Qwen3-1.7B)**
+    *   基于 RKLLM 部署全离线 **W8A8 量化** 大语言模型。
     *   作为系统的“前额叶皮层”，分析视觉通道生成的 JSON 数据并进行上下文决策。
     *   通过异步流水线优化，生成速度达到 **14 tokens/s**。
 
@@ -68,7 +68,7 @@ graph TD
         
         subgraph "慢循环：认知推理 (14 tokens/s)"
             R1["阶段 1: 上下文窗口<br/>共享 DRAM Buffer"]
-            R2["阶段 2: DeepSeek R1 1.5B<br/>W4A16 量化 LLM"]
+            R2["阶段 2: Qwen3-1.7B<br/>W4A16 量化 LLM"]
             R3["阶段 3: 决策引擎<br/>逻辑判断与安规检查"]
             
             R1 --> R2
@@ -156,7 +156,7 @@ scp -r ../models user@rk3588:/opt/fusion/
 export DISPLAY=:0
 sudo fusion_core \
   --vision_model /opt/fusion/models/yolov11s.rknn \
-  --llm_model /opt/fusion/models/deepseek-r1-1.5b_w4a16.rknn \
+  --llm_model /opt/fusion/models/qwen3-1.7b_w4a16.rknn \
   --enable_gl_render true
 ```
 
@@ -171,7 +171,7 @@ fusion/
 ├── 📂 src/                      # 应用层源码
 │   ├── 🔹 main.cpp              # 程序入口
 │   ├── 📂 core/                 # 线程池与调度器
-│   ├── 📂 modules/              # 业务逻辑 (YOLO / DeepSeek)
+│   ├── 📂 modules/              # 业务逻辑 (YOLO / Qwen3)
 │   ├── 📂 ui/                   # Qt6/QML 仪表盘界面
 │   └── 📂 hal/                  # 硬件抽象层 (MPP/RGA/DRM)
 │
@@ -182,7 +182,7 @@ fusion/
 
 ## 🛣️ 路线图 (Roadmap)
 - [x] **阶段 1**: 核心流水线零拷贝实现 (已完成)
-- [x] **阶段 2**: DeepSeek LLM 接入与优化 (已完成)
+- [x] **阶段 2**: Qwen3 LLM 接入与优化 (已完成)
 - [ ] **阶段 3**: **Qt HMI 与 EGL Image 深度集成** (进行中)
 - [ ] **阶段 4**: 多模态输入支持 (Audio/STT) 以实现语音交互
 
