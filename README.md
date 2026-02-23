@@ -36,7 +36,7 @@ Current edge AI solutions often suffer from memory bottlenecks and serialized pr
 *   **Path A: Real-time Vision (YOLOv11)**
     *   Deploying state-of-the-art YOLOv11 on NPU with operator fusion and quantization calibration.
     *   Generates structured JSON perception data at **60+ FPS**.
-*   **Path B: Semantic Reasoning (DeepSeek R1 1.5B)**
+*   **Path B: Semantic Reasoning (Qwen3-1.7B)**
     *   Fully offline LLM deployment via RKLLM with **W4A16 quantization**.
     *   Acts as the system's "Prefrontal Cortex," analyzing vision-generated JSON to make context-aware decisions.
     *   Achieves **14 tokens/s** generation speed through asynchronous pipeline optimizations.
@@ -70,7 +70,7 @@ graph TD
         
         subgraph "Slow Loop: Cognitive Reasoning (14 tokens/s)"
             R1["Stage 1: Context Window<br/>Shared DRAM Buffer"]
-            R2["Stage 2: DeepSeek R1 1.5B<br/>W4A16 Quantized LLM"]
+            R2["Stage 2: Qwen3-1.7B<br/>W4A16 Quantized LLM"]
             R3["Stage 3: Decision Engine<br/>Logic & Safety Checks"]
             
             R1 --> R2
@@ -158,7 +158,7 @@ scp -r ../models user@rk3588:/opt/fusion/
 export DISPLAY=:0
 sudo fusion_core \
   --vision_model /opt/fusion/models/yolov11s.rknn \
-  --llm_model /opt/fusion/models/deepseek-r1-1.5b_w4a16.rknn \
+  --llm_model /opt/fusion/models/qwen3-1.7b_w4a16.rknn \
   --enable_gl_render true
 ```
 
@@ -173,7 +173,7 @@ fusion/
 ├── 📂 src/                      # Application Source Code
 │   ├── 🔹 main.cpp              # Entry point
 │   ├── 📂 core/                 # Thread Pools & Schedulers
-│   ├── 📂 modules/              # YOLO / DeepSeek Logic
+│   ├── 📂 modules/              # YOLO / Qwen3 Logic
 │   ├── 📂 ui/                   # Qt6/QML Dashboard
 │   └── 📂 hal/                  # Hardware Abstraction (MPP/RGA/DRM)
 │
@@ -184,7 +184,7 @@ fusion/
 
 ## 🛣️ Roadmap
 - [x] **Phase 1**: Core pipeline with Zero-Copy (Done).
-- [x] **Phase 2**: DeepSeek LLM integration (Done).
+- [x] **Phase 2**: Qwen3 LLM integration (Done).
 - [ ] **Phase 3**: **Qt HMI with EGL Image Integration** (In Progress).
 - [ ] **Phase 4**: Multi-modal inputs (Audio/STT) for voice interaction.
 
