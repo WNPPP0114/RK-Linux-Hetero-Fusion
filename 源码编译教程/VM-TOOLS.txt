@@ -1,9 +1,0 @@
-对于像Ubuntu这样的现代Linux发行版，官方建议使用Open VM Tools而不是传统的VMware Tools。
-打开终端，然后输入以下命令来安装：
-sudo apt update
-sudo apt install open-vm-tools open-vm-tools-desktop
-
-- `open-vm-tools` 是基础包，适用于服务器和桌面虚拟机。
-- `open-vm-tools-desktop` 包含了桌面环境下的额外功能，如屏幕分辨
-
-重启后生效
