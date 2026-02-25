@@ -1,4 +1,4 @@
-# RK3588 端侧视觉与多模态 LLM
+# RK-Linux-Hetero-Fusion
 
 **C++ · aarch64 · RKNN · RKLLM · YOLO · Qwen3**
 
