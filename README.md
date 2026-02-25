@@ -1,4 +1,4 @@
-# RK3588 Edge Vision & Multimodal LLM
+# RK-Linux-Hetero-Fusion
 
 **C++ · aarch64 · RKNN · RKLLM · YOLO · Qwen3**
 
