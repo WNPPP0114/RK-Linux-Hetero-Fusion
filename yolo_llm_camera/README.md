@@ -13,7 +13,7 @@
 ## 依赖
 
 - 本仓库内 `yolo-rk3588/rknn-cpp-Multithreading`（YOLO 模型、3rdparty、postprocess、NpuCoreScheduler）
-- RKLLM 运行时（与 qwen3-1.7b 部署相同）
+- RKLLM 运行时（参考 `SDK_Chg` 中的环境搭建）
 - CMake 中 `RKLLM_API_PATH` 需指向本机 rkllm-runtime 的 `librkllm_api` 目录
 
 ## 编译
@@ -27,7 +27,7 @@ cd yolo_llm_camera
 
 ## 运行（开发板）
 
-将以下内容推到板子同一目录（例如 `/home/topeet/RKLLM/yolo_llm/`）：
+将以下内容推到板子同一目录（例如 `/home/admin/RKLLM/yolo_llm/`）：
 
 - `install/demo_Linux_aarch64/` 整个目录（或将其内容推到 `yolo_llm/demo_Linux_aarch64/`）
 - LLM 模型（如 `Qwen3-1.7B_W8A8_RK3588.rkllm`）放在与 `demo_Linux_aarch64` 同级（如 `yolo_llm/`），以便 `../Qwen3-1.7B_W8A8_RK3588.rkllm` 能访问
@@ -36,7 +36,7 @@ cd yolo_llm_camera
 **进入目录并执行：**
 
 ```bash
-cd /home/topeet/RKLLM/yolo_llm/demo_Linux_aarch64
+cd /home/admin/RKLLM/yolo_llm/demo_Linux_aarch64
 ulimit -HSn 102400
 export LD_LIBRARY_PATH=./lib
 ./yolo_llm_camera_demo model/RK3588/yolo26n.rknn ../Qwen3-1.7B_W8A8_RK3588.rkllm /dev/video21 256 4096
@@ -59,5 +59,5 @@ export LD_LIBRARY_PATH=./lib
 
 ## 文档索引
 
-- 整体仓库与部署：仓库根目录 `README.md`、`02.rknn-llm部署.txt` 第四节。
+- 整体仓库与部署：仓库根目录 `README.md`、`SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md`。
 - 单独 YOLO 多线程与 NPU 调度：`yolo-rk3588/rknn-cpp-Multithreading/README.md`。

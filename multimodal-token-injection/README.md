@@ -16,7 +16,7 @@
 
 ## 依赖
 
-- RKLLM Runtime（与 qwen3-1.7b 部署相同，如 `librkllmrt.so`）。
+- RKLLM Runtime（与 `SDK_Chg` 中的环境搭建相同，如 `librkllmrt.so`）。
 - 若需在 PC 上生成完整 prefix/suffix：`pip install transformers`，并指定 `--qwen-dir` 指向 Qwen3-1.7B 目录。
 
 ## 生成映射表
@@ -40,7 +40,7 @@ python3 scripts/generate_yolo_qwen_token_map.py --qwen-dir /path/to/Qwen3-1.7B -
 
 ```bash
 cd multimodal-token-injection
-python3 scripts/generate_yolo_qwen_token_map.py --qwen-dir ../qwen3-1.7b/Qwen3-1.7B --output include/yolo_qwen_token_map.h
+python3 scripts/generate_yolo_qwen_token_map.py --qwen-dir /path/to/Qwen3-1.7B --output include/yolo_qwen_token_map.h
 ```
 
 ### 2. 编译（PC，aarch64 交叉编译）
@@ -55,9 +55,9 @@ cd multimodal-token-injection
 ### 3. 推送到开发板（PC 执行 adb）
 
 ```bash
-adb shell mkdir -p /home/topeet/RKLLM/qwen3-1.7b
-adb push multimodal-token-injection/install/demo_Linux_aarch64/ /home/topeet/RKLLM/qwen3-1.7b/
-adb push qwen3-1.7b/export/Qwen3-1.7B_W8A8_RK3588.rkllm /home/topeet/RKLLM/qwen3-1.7b/
+adb shell mkdir -p /home/admin/RKLLM/token_injection
+adb push multimodal-token-injection/install/demo_Linux_aarch64/ /home/admin/RKLLM/token_injection/
+adb push /path/to/your/Qwen3-1.7B_W8A8_RK3588.rkllm /home/admin/RKLLM/token_injection/
 ```
 
 ### 4. 开发板运行
@@ -65,7 +65,7 @@ adb push qwen3-1.7b/export/Qwen3-1.7B_W8A8_RK3588.rkllm /home/topeet/RKLLM/qwen3
 **进入目录：**
 
 ```bash
-cd /home/topeet/RKLLM/qwen3-1.7b/demo_Linux_aarch64
+cd /home/admin/RKLLM/token_injection/demo_Linux_aarch64
 ```
 
 **执行指令：**
