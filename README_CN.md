@@ -54,7 +54,7 @@ export LD_LIBRARY_PATH=./lib
 - **空格**：问「摄像头看到了什么？」；每次回答后打印 **Performance Metrics**
 - **q**：退出
 
-详见 [yolo_llm_camera/README.md](yolo_llm_camera/README.md)。
+详见 [yolo_llm_camera/README_CN.md](yolo_llm_camera/README_CN.md)。
 
 #### 三、多模态 Token 注入（multimodal-token-injection）
 
@@ -70,7 +70,7 @@ export LD_LIBRARY_PATH=./lib
 ./multimodal_token_injection_demo ../Qwen3-1.7B_W8A8_RK3588.rkllm 256 4096
 ```
 
-详见 [multimodal-token-injection/README.md](multimodal-token-injection/README.md)。
+详见 [multimodal-token-injection/README_CN.md](multimodal-token-injection/README_CN.md)。
 
 ### 依赖与环境
 
@@ -83,7 +83,10 @@ export LD_LIBRARY_PATH=./lib
 
 | 文档 | 说明 |
 |------|------|
-| [SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md](SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md) | 环境预置与用户系统修改 |
-| [SDK_Chg/rknn-llm环境搭建.txt](SDK_Chg/rknn-llm环境搭建.txt) | RKLLM 部署参考 |
-| [yolo_llm_camera/README.md](yolo_llm_camera/README.md) | YOLO+LLM 摄像头联调 |
-| [multimodal-token-injection/README.md](multimodal-token-injection/README.md) | Token 直通多模态 |
+| [SDK_Chg/00.Linux_image_preset_NPU_environment-implementation_plan.md](SDK_Chg/00.Linux_image_preset_NPU_environment-implementation_plan.md) | 环境预置与用户系统修改 |
+| [SDK_Chg/rknn-toolkit2_environment_setup.txt](SDK_Chg/rknn-toolkit2_environment_setup.txt) | RKNN-Toolkit2 环境搭建指南 |
+| [SDK_Chg/rknn-llm_environment_setup.txt](SDK_Chg/rknn-llm_environment_setup.txt) | RKLLM 部署参考 |
+| [yolo_llm_camera/README_CN.md](yolo_llm_camera/README_CN.md) | YOLO+LLM 摄像头联调 |
+| [multimodal-token-injection/README_CN.md](multimodal-token-injection/README_CN.md) | Token 直通多模态 |
+| [ubuntu20.04_docker/01.Docker_installation_instructions.txt](ubuntu20.04_docker/01.Docker_installation_instructions.txt) | Docker 安装指南 |
+| [ubuntu20.04_docker/02.Docker_configure_ubuntu20.04_environment.txt](ubuntu20.04_docker/02.Docker_configure_ubuntu20.04_environment.txt) | Docker 编译环境配置 |

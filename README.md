@@ -83,7 +83,10 @@ See [multimodal-token-injection/README.md](multimodal-token-injection/README.md)
 
 | Doc | Description |
 |-----|-------------|
-| [SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md](SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md) | Pre-install NPU env & User rename (Chinese) |
-| [SDK_Chg/rknn-llm环境搭建.txt](SDK_Chg/rknn-llm环境搭建.txt) | RKLLM deployment guide |
+| [SDK_Chg/00.Linux_image_preset_NPU_environment-implementation_plan.md](SDK_Chg/00.Linux_image_preset_NPU_environment-implementation_plan.md) | Pre-install NPU env & User rename (Chinese) |
+| [SDK_Chg/rknn-toolkit2_environment_setup.txt](SDK_Chg/rknn-toolkit2_environment_setup.txt) | RKNN-Toolkit2 deployment guide |
+| [SDK_Chg/rknn-llm_environment_setup.txt](SDK_Chg/rknn-llm_environment_setup.txt) | RKLLM deployment guide |
 | [yolo_llm_camera/README.md](yolo_llm_camera/README.md) | YOLO+LLM camera |
 | [multimodal-token-injection/README.md](multimodal-token-injection/README.md) | Token passthrough |
+| [ubuntu20.04_docker/01.Docker_installation_instructions.txt](ubuntu20.04_docker/01.Docker_installation_instructions.txt) | Docker installation guide |
+| [ubuntu20.04_docker/02.Docker_configure_ubuntu20.04_environment.txt](ubuntu20.04_docker/02.Docker_configure_ubuntu20.04_environment.txt) | Docker build env configuration |

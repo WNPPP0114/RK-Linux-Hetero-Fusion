@@ -1,39 +1,41 @@
-# YOLO + LLM 摄像头联调
+# YOLO + LLM Camera Integration
 
-你问 LLM「摄像头看到了什么」，LLM 根据当前画面的 YOLO 检测结果回答。**与单独 YOLO demo 同款加速**：多实例线程池 + 3 核 NPU 并行，画面与终端实时显示 FPS、延迟与视觉数据，每次 LLM 回答后打印完整 Performance Metrics。
+中文 / Chinese: [README_CN.md](README_CN.md)
 
-## 功能概览
+Ask the LLM "what do you see?", and it responds based on the current YOLO detection results. **Powered by the same acceleration as the standalone YOLO demo**: Multi-instance thread pool + 3 NPU cores running in parallel. Real-time display of FPS, latency, and visual data on screen and terminal. Full Performance Metrics are printed after each LLM response.
 
-- **YOLO 线程池**：默认 6 个推理实例（`INFERENCE_THREAD_NUM`，可与单独 yolo 一致改为 12），轮询绑定 3 个 NPU 核，读帧与推理并行，提升 FPS 与 NPU 利用率。
-- **画面显示**：左上角三行——操作提示；**FPS**、**Latency (ms)**；**objs: N  class1, class2, ...**（检测数量与类别名）。
-- **终端打印**：约每秒一行 `[Vision] N objs [class1, class2, ...]  FPS: xx.x  Latency: xx ms`。
-- **按空格/回车**：用当前帧检测结果直接问「摄像头看到了什么？」，无需再输入问题；LLM 回答结束后打印 **Performance Metrics**（Total Cost、First Token、Token Count、E2E/Decode Speed、Memory、CPU/NPU、NPU Temp），与纯 LLM demo 一致。
-- **按 q**：退出。
+## Feature Overview
 
-## 依赖
+- **YOLO Thread Pool**: Default 6 inference instances (`INFERENCE_THREAD_NUM`, can be changed to 12 like the standalone YOLO), bound to 3 NPU cores in a round-robin fashion. Frame reading and inference run in parallel to boost FPS and NPU utilization.
+- **On-Screen Display**: Top-left shows three lines: Operation prompts; **FPS**, **Latency (ms)**; **objs: N class1, class2, ...** (number of detections and class names).
+- **Terminal Output**: About one line per second: `[Vision] N objs [class1, class2, ...] FPS: xx.x Latency: xx ms`.
+- **Space/Enter Key**: Ask "What do you see?" using the detection results of the current frame directly, no need to type the question. After the LLM finishes responding, **Performance Metrics** (Total Cost, First Token, Token Count, E2E/Decode Speed, Memory, CPU/NPU, NPU Temp) are printed, consistent with the standalone LLM demo.
+- **q Key**: Quit.
 
-- 本仓库内 `yolo-rk3588/rknn-cpp-Multithreading`（YOLO 模型、3rdparty、postprocess、NpuCoreScheduler）
-- RKLLM 运行时（参考 `SDK_Chg` 中的环境搭建）
-- CMake 中 `RKLLM_API_PATH` 需指向本机 rkllm-runtime 的 `librkllm_api` 目录
+## Dependencies
 
-## 编译
+- `yolo-rk3588/rknn-cpp-Multithreading` in this repository (YOLO model, 3rdparty, postprocess, NpuCoreScheduler).
+- RKLLM Runtime (refer to the environment setup in `SDK_Chg`).
+- `RKLLM_API_PATH` in CMake must point to the `librkllm_api` directory of your local rkllm-runtime.
+
+## Build
 
 ```bash
 cd yolo_llm_camera
 ./build-linux.sh
 ```
 
-产物在 `install/demo_Linux_aarch64/`：`yolo_llm_camera_demo` 与 `lib/`、`model/`（若存在）。
+Artifacts are in `install/demo_Linux_aarch64/`: `yolo_llm_camera_demo` along with `lib/` and `model/` (if present).
 
-## 运行（开发板）
+## Run (On Board)
 
-将以下内容推到板子同一目录（例如 `/home/admin/RKLLM/yolo_llm/`）：
+Push the following to the same directory on the board (e.g., `/home/admin/RKLLM/yolo_llm/`):
 
-- `install/demo_Linux_aarch64/` 整个目录（或将其内容推到 `yolo_llm/demo_Linux_aarch64/`）
-- LLM 模型（如 `Qwen3-1.7B_W8A8_RK3588.rkllm`）放在与 `demo_Linux_aarch64` 同级（如 `yolo_llm/`），以便 `../Qwen3-1.7B_W8A8_RK3588.rkllm` 能访问
-- 确保 `model/RK3588/yolo26n.rknn` 与 `model/coco_80_labels_list.txt` 在运行目录下（安装时若存在会从 yolo 工程拷贝）
+- The entire `install/demo_Linux_aarch64/` directory (or push its contents to `yolo_llm/demo_Linux_aarch64/`).
+- The LLM model (e.g., `Qwen3-1.7B_W8A8_RK3588.rkllm`) placed alongside `demo_Linux_aarch64` (e.g., in `yolo_llm/`), so `../Qwen3-1.7B_W8A8_RK3588.rkllm` can access it.
+- Ensure `model/RK3588/yolo26n.rknn` and `model/coco_80_labels_list.txt` are in the run directory (they are copied from the yolo project during installation if present).
 
-**进入目录并执行：**
+**Enter the directory and execute:**
 
 ```bash
 cd /home/admin/RKLLM/yolo_llm/demo_Linux_aarch64
@@ -42,22 +44,22 @@ export LD_LIBRARY_PATH=./lib
 ./yolo_llm_camera_demo model/RK3588/yolo26n.rknn ../Qwen3-1.7B_W8A8_RK3588.rkllm /dev/video21 256 4096
 ```
 
-- **第 3 参数**：摄像头设备（`0`、`/dev/video0` 或 USB 常用 `/dev/video21`）或视频文件路径。
-- **第 4/5 参数**：`max_new_tokens`、`max_context_len`（可省略，默认 256、4096）。
+- **3rd Parameter**: Camera device (`0`, `/dev/video0` or commonly `/dev/video21` for USB) or video file path.
+- **4th/5th Parameters**: `max_new_tokens`, `max_context_len` (optional, default 256, 4096).
 
-无 DISPLAY 时（如 SSH 无 X11）：不弹窗，改为每帧后在终端输入问题（直接回车即问「摄像头看到了什么？」）。
+Without DISPLAY (e.g., SSH without X11): No window will pop up. Instead, input your question in the terminal after each frame (pressing Enter directly asks "What do you see?").
 
-## 线程数（可选）
+## Thread Count (Optional)
 
-源码中默认 `INFERENCE_THREAD_NUM` 为 6。若要与单独 yolo demo 一致用 12，可修改 `src/yolo_llm_camera_demo.cpp` 顶部：
+In the source code, `INFERENCE_THREAD_NUM` defaults to 6. To use 12, matching the standalone YOLO demo, modify the top of `src/yolo_llm_camera_demo.cpp`:
 
 ```cpp
 #define INFERENCE_THREAD_NUM  12
 ```
 
-重新编译后生效。
+Recompile for the change to take effect.
 
-## 文档索引
+## Docs Index
 
-- 整体仓库与部署：仓库根目录 `README.md`、`SDK_Chg/00.Linux镜像预置NPU环境-实施计划.md`。
-- 单独 YOLO 多线程与 NPU 调度：`yolo-rk3588/rknn-cpp-Multithreading/README.md`。
+- Overall repository & deployment: Root `README.md`, `SDK_Chg/00.Linux_image_preset_NPU_environment-implementation_plan.md`.
+- Standalone YOLO multi-threading & NPU scheduling: `yolo-rk3588/rknn-cpp-Multithreading/README.md`.

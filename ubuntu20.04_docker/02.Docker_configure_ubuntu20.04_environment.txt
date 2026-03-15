@@ -1,0 +1,67 @@
+# RK3588 编译 Docker 环境说明
+# ================================
+
+# 第一步：创建/重建容器（宿主机终端执行）
+# ---------------------------------------
+# 必须加 --privileged，赋予容器完整硬件权限。
+# 仅首次或需要“全新容器”时执行；日常使用请用第三步。
+
+docker rm -f ubuntu20_dev 2>/dev/null
+docker run -it --privileged \
+  --name ubuntu20_dev \
+  -v ~/project_build:/work \
+  -v ~/BSP:/BSP \
+  ubuntu:20.04 bash
+
+
+# 第二步：容器内一次性环境安装（进入容器后执行）
+# -----------------------------------------------
+# 以下整段在容器内复制粘贴执行，中途失败请根据报错排查后重跑。
+
+# 1. 换源并更新
+sed -i 's@//.*archive.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list
+sed -i 's@//.*security.ubuntu.com@//mirrors.aliyun.com@g' /etc/apt/sources.list
+apt-get update
+
+# 2. 安装编译依赖（含 bsdmainutils 修复 hexdump、whiptail 供 build 菜单）
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -y \
+    git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev \
+    gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev \
+    x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+    libxml2-utils xsltproc unzip device-tree-compiler \
+    python2 python2-dev python3 python3-pip python3-pyelftools \
+    libssl-dev lzop bc rsync expect \
+    whiptail liblz4-tool sudo file net-tools iputils-ping \
+    time cpio wget ssh qemu-user-static binfmt-support pigz \
+    bsdmainutils
+
+# 3. 修复 Python 指向（buildroot 等需要 python -> python2）
+curl -sL https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+python2 get-pip.py
+rm -f get-pip.py
+ln -sf /usr/bin/python2 /usr/bin/python
+
+# 4. Git 加速（可选，国内拉 GitHub 慢时可保留）
+git config --global url."https://gh-proxy.com/https://github.com".insteadOf "https://github.com"
+
+# 5. 预下载 CMake（已存在则跳过，避免 buildroot 重复下）
+mkdir -p /BSP/rk3588-linux/buildroot/dl/cmake
+if [ -f /BSP/rk3588-linux/buildroot/dl/cmake/cmake-3.22.3.tar.gz ]; then
+    echo "✅ CMake 已存在，跳过下载"
+else
+    echo "⬇️ 正在下载 CMake..."
+    wget -q -O /BSP/rk3588-linux/buildroot/dl/cmake/cmake-3.22.3.tar.gz \
+        https://cmake.org/files/v3.22/cmake-3.22.3.tar.gz
+fi
+
+# 6. 完成
+echo "------------------------------------------------"
+echo "✅ 环境配置完毕。编译请执行: cd /BSP/rk3588-linux && ./build.sh"
+
+
+# 第三步：下次启动容器（宿主机终端执行）
+# ---------------------------------------
+# 未执行过 docker rm 时，直接启动已有容器，环境与已装软件均保留。
+
+docker start -ai ubuntu20_dev
