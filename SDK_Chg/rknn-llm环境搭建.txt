@@ -1,0 +1,21 @@
+01.rknn-llm环境搭建
+#进入 rknn Conda 环境
+conda activate rknn
+
+
+#安装瑞芯微提供的 rkllm_toolkit-1.2.3 版本的软件包
+pip install RKNN/rknn-llm-main/rkllm-toolkit/packages/rkllm_toolkit-1.2.3-cp39-cp39-linux_x86_64.whl -i https://pypi.mirrors.tuna.tsinghua.edu.cn/simple
+
+检查版本
+NumPy	conda list numpy	精准过滤，只显示 NumPy 及其版本号、构建信息。
+OpenCV	conda list opencv	OpenCV 在 Conda 中的包名通常就是 opencv。
+
+#需要再次更新 NumPy：
+pip uninstall numpy -y
+pip install "numpy<2"
+
+
+#安装OpenCV
+pip uninstall opencv-python -y
+pip install "opencv-python<=4.9.0.80" -i https://pypi.tuna.tsinghua.edu.cn/simple
+

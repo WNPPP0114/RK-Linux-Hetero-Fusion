@@ -1,0 +1,106 @@
+01.rknn-toolkit2环境搭建
+
+清理多余缓存
+pip cache purge
+conda clean --all
+
+（如果要删除旧环境）
+pip uninstall -y rknn-toolkit2
+
+要从旧版本更新的话：
+# 假设你已经下载好了新版本的 whl 文件
+pip install -U rknn_toolkit2-x.x.x-cp3x-cp3x-linux_x86_64.whl
+
+直接使用当前最新版
+rknn_toolkit2-2.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+rknn-toolkit2/packages/x86_64/requirements_cp39-2.3.2.txt
+rknn_toolkit2-2.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+arm64_requirements_cp39.txt
+
+#进入 rknn Conda 环境
+conda activate rknn
+
+sudo apt-get update
+
+
+#安装瑞芯微提供的 requirements_cp39-1.4.0.txt 文件所记录的依赖包，
+#注意：1.6.0及之前的版本需要先把txt里面的tensorflow==2.8.0注释掉，不然容易环境不兼容,同时numpy要小于2！！！
+pip install -r RKNN/rknn-toolkit2-master/rknn-toolkit2/packages/x86_64/requirements_cp39-2.3.2.txt -i https://mirrors.aliyun.com/pypi/simple/
+
+#安装瑞芯微提供的 rknn_toolkit2-2.3.2 版本的软件包（注意1.6.0版本需要加 --no-deps来避免TensorFlow环境的冲突）
+pip install -U RKNN/rknn-toolkit2-master/rknn-toolkit2/packages/x86_64/rknn_toolkit2-2.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl -i https://mirrors.aliyun.com/pypi/simple/
+
+
+
+
+开发板串口，类似于虚拟机：
+
+#查是否安装 Conda 和版本信息，若已安装则可省略此小节步骤。
+conda -V
+
+#下载 Conda 安装包（或者从官网下载）
+wget -c https://mirrors.bfsu.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-aarch64.sh
+
+#安装 Conda
+chmod 777 Miniconda3-latest-Linux-aarch64.sh
+./Miniconda3-latest-Linux-aarch64.sh
+
+如果不小心安装了x86版本的，一般一步可以解决：
+rm -rf /root/miniconda3
+然后重新安装aarch64版本的
+
+ #安装完成后刷新本终端：
+source /home/topeet/.bashrc
+source /root/.bashrc
+
+#配置镜像源：
+cat > ~/.condarc <<EOF
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch-lts: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  deepmodeling: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  nvidia: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+EOF
+
+#创建一个 Python3.9 版本名为 rknn 的 Conda 环境（python版本按自己需要选择）
+conda create -n rknn python=3.9 -y
+
+
+#进入 rknn onda 环境
+conda activate rknn
+
+#将rknn_toolkit_lite2-1.6.0-cp39-cp39-linux_aarch64.whl 发送到开发板中（以下是pycharm终端示例，需要开发板连接到虚拟机）
+adb push /home/wzp/RKNN/rknn-toolkit2-master/rknn-toolkit2/packages/arm64/arm64_requirements_cp39.txt /home/topeet
+
+adb push /home/wzp/RKNN/rknn-toolkit2-master/rknn-toolkit2/packages/arm64/rknn_toolkit2-2.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl /home/topeet
+
+
+
+#安装whl
+# 更新源列表
+sudo apt-get update
+# 安装 cmake 和 gcc/g++ 编译工具链
+sudo apt-get install -y cmake build-essential
+# python依赖包（ onnxoptimizer会久一点）
+pip install -r /home/topeet/arm64_requirements_cp39.txt -i https://mirrors.aliyun.com/pypi/simple/
+# rknn_toolkit2（- U代表原有的基础上升级）
+pip install -U /home/topeet/rknn_toolkit2-2.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl -i https://mirrors.aliyun.com/pypi/simple/
+
+
+#安装opencv
+pip install "opencv-python<=4.9.0.80" -i https://mirrors.aliyun.com/pypi/simple/
+
+
+
